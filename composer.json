@@ -17,7 +17,10 @@
         "laravel/wayfinder": "^0.1.9"
     },
     "require-dev": {
+        "barryvdh/laravel-debugbar": "^3.16",
+        "driftingly/rector-laravel": "*",
         "fakerphp/faker": "^1.23",
+        "larastan/larastan": "^3.8",
         "laravel/boost": "^1.8",
         "laravel/pail": "^1.2.2",
         "laravel/pint": "^1.24",
@@ -40,6 +43,7 @@
         }
     },
     "scripts": {
+        "analyse": "vendor/bin/phpstan analyse",
         "setup": [
             "composer install",
             "@php -r \"file_exists('.env') || copy('.env.example', '.env');\"",
