@@ -4,13 +4,13 @@ import { createInertiaApp } from '@inertiajs/vue3';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import type { DefineComponent } from 'vue';
 import { createApp, h } from 'vue';
-import { initializeTheme } from './composables/useAppearance';
+import { initializeTheme } from '@/composables/useAppearance.js';
 
-const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
+const appName = import.meta.env.VITE_APP_NAME || 'Arman';
 
 createInertiaApp({
-    title: (title) => (title ? `${title} - ${appName}` : appName),
-    resolve: (name) =>
+    title: (title:string) => (title ? `${title} - ${appName}` : appName),
+    resolve: (name:string) =>
         resolvePageComponent(
             `./pages/${name}.vue`,
             import.meta.glob<DefineComponent>('./pages/**/*.vue'),

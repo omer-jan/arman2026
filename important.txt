@@ -1,0 +1,63 @@
+check the comoser.json script for code quality tools and how to use them
+Keep frontend simple, Inertia-first, Tailwind-based, and avoid unnecessary libraries.
+
+1️⃣ Pint
+2️⃣ PHPStan
+
+for front end
+npm run lint
+npm run format
+
+
+
+vendor/bin/pint
+vendor/bin/phpstan analyse
+
+
+Front-end libraries to use:
+
+axios → background API calls
+
+pinia → state management
+
+ziggy-js → Laravel routes in Vue
+
+dayjs → date handling
+
+vue-toastification → notifications
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+✅ HOW to use Rector (Safe Strategy)
+Step 1 – Dry run (NO changes)
+vendor/bin/rector process --dry-run
+
+
+✔ Shows what WILL change
+✔ Does NOT touch files
+Step 2 – Review output
+
+You read the changes.
+
+If output looks dangerous → STOP.
+
+Step 3 – Run real Rector (only if safe)
+vendor/bin/rector process
+
+Step 4 – Clean & verify
+vendor/bin/pint
+vendor/bin/phpstan analyse

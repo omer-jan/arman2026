@@ -3,66 +3,61 @@
 declare(strict_types=1);
 
 use Rector\Config\RectorConfig;
-use Rector\Laravel\Set\LaravelSetList;
-use Rector\Set\ValueObject\LevelSetList;
-use Rector\TypeDeclaration\Rector\ClassMethod\AddVoidReturnTypeWhereNoReturnRector;
+// use Rector\Laravel\Set\LaravelSetList;
 use Rector\DeadCode\Rector\ClassMethod\RemoveUnusedPrivateMethodRector;
 use Rector\DeadCode\Rector\Property\RemoveUnusedPrivatePropertyRector;
+use Rector\Set\ValueObject\LevelSetList;
+use Rector\TypeDeclaration\Rector\ClassMethod\AddVoidReturnTypeWhereNoReturnRector;
 
 return static function (RectorConfig $rectorConfig): void {
 
     /**
-     * 1️⃣ Paths – ONLY business code
+     * 1️⃣ Process ONLY business code
      */
     $rectorConfig->paths([
-        __DIR__ . '/app',
-        __DIR__ . '/routes',
-        __DIR__ . '/database',
-        __DIR__ . '/tests',
+        __DIR__.'/app',
+        __DIR__.'/routes',
+        __DIR__.'/database',
+        __DIR__.'/tests',
     ]);
 
     /**
-     * 2️⃣ Skip dangerous locations
+     * 2️⃣ Skip generated & dangerous paths
      */
     $rectorConfig->skip([
-        __DIR__ . '/vendor',
-        __DIR__ . '/storage',
-        __DIR__ . '/bootstrap/cache',
-
-        // ❗ Do not touch compiled files
-        __DIR__ . '/public',
+        __DIR__.'/vendor',
+        __DIR__.'/storage',
+        __DIR__.'/bootstrap/cache',
+        __DIR__.'/public',
     ]);
 
     /**
      * 3️⃣ Language & Framework level
-     * Laravel 12 → PHP 8.3
      */
     $rectorConfig->sets([
         LevelSetList::UP_TO_PHP_83,
-        LaravelSetList::LARAVEL_120,
+        //  LaravelSetList::LARAVEL_120,
     ]);
 
     /**
-     * 4️⃣ Enterprise safety switches
+     * 4️⃣ Enterprise safety rules
+     * Let Pint handle formatting & imports
      */
-    $rectorConfig->importNames();
+    $rectorConfig->importNames(false);
     $rectorConfig->importShortClasses(false);
     $rectorConfig->removeUnusedImports(false);
 
     /**
-     * 5️⃣ Enable ONLY SAFE rectors
+     * 5️⃣ SAFE rectors only
      */
     $rectorConfig->rules([
-        // Add ": void" where method has no return
         AddVoidReturnTypeWhereNoReturnRector::class,
-
-        // Remove unused PRIVATE code only
         RemoveUnusedPrivateMethodRector::class,
         RemoveUnusedPrivatePropertyRector::class,
     ]);
 
     /**
-     * 6️⃣ Performance (large codebases)
+     * 6️⃣ Performance for large codebases
      */
     $rectorConfig->parallel();
     $rectorConfig->memoryLimit('2G');
