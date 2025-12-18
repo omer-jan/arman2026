@@ -1,6 +1,7 @@
 import { onMounted, ref } from 'vue';
 
 type Appearance = 'light' | 'dark' | 'system';
+export type SidebarVariant = 'sidebar' | 'floating' | 'inset';
 
 export function updateTheme(value: Appearance) {
     if (typeof window === 'undefined') {
@@ -68,7 +69,11 @@ export function initializeTheme() {
 }
 
 const appearance = ref<Appearance>('system');
-
+const sidebarVariant = ref<SidebarVariant>(
+    ((typeof window !== 'undefined'
+        ? (localStorage.getItem('sidebar-variant') as SidebarVariant | null)
+        : null) || 'inset') as SidebarVariant,
+);
 export function useAppearance() {
     onMounted(() => {
         const savedAppearance = localStorage.getItem(
@@ -77,6 +82,13 @@ export function useAppearance() {
 
         if (savedAppearance) {
             appearance.value = savedAppearance;
+        }
+
+        const savedSidebar = localStorage.getItem(
+            'sidebar-variant',
+        ) as SidebarVariant | null;
+        if (savedSidebar) {
+            sidebarVariant.value = savedSidebar;
         }
     });
 
@@ -92,8 +104,17 @@ export function useAppearance() {
         updateTheme(value);
     }
 
+    function updateSidebarVariant(value: SidebarVariant) {
+        sidebarVariant.value = value;
+
+        // Store in localStorage for client-side persistence...
+        localStorage.setItem('sidebar-variant', value);
+    }
+
     return {
         appearance,
         updateAppearance,
+        sidebarVariant,
+        updateSidebarVariant,
     };
 }

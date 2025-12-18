@@ -2,6 +2,7 @@
 import { Head } from '@inertiajs/vue3';
 
 import AppearanceTabs from '@/components/AppearanceTabs.vue';
+import SidebarVariantTabs from '@/components/SidebarVariantTabs.vue';
 import HeadingSmall from '@/components/HeadingSmall.vue';
 import { type BreadcrumbItem } from '@/types';
 
@@ -27,7 +28,14 @@ const breadcrumbItems: BreadcrumbItem[] = [
                     title="Appearance settings"
                     description="Update your account's appearance settings"
                 />
-                <AppearanceTabs />
+               <p class="text-sm font-medium">Color theme</p>
+<AppearanceTabs />
+
+<hr />
+
+<p class="text-sm font-medium">Sidebar style</p>
+<SidebarVariantTabs />
+
             </div>
         </SettingsLayout>
     </AppLayout>

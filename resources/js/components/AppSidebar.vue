@@ -2,6 +2,7 @@
 import NavFooter from '@/components/NavFooter.vue';
 import NavMain from '@/components/NavMain.vue';
 import NavUser from '@/components/NavUser.vue';
+import { useAppearance } from '@/composables/useAppearance';
 import {
     Sidebar,
     SidebarContent,
@@ -37,10 +38,12 @@ const footerNavItems: NavItem[] = [
     //     icon: BookOpen,
     // },
 ];
+
+const { sidebarVariant } = useAppearance();
 </script>
 
 <template>
-    <Sidebar collapsible="icon" variant="sidebar">
+    <Sidebar collapsible="icon" :variant="sidebarVariant">
         <SidebarHeader>
             <SidebarMenu>
                 <SidebarMenuItem>
