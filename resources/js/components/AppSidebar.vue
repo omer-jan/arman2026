@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import NavFooter from '@/components/NavFooter.vue';
 import NavMain from '@/components/NavMain.vue';
-import NavUser from '@/components/NavUser.vue';
 import { useAppearance } from '@/composables/useAppearance';
 import {
     Sidebar,
@@ -62,7 +61,6 @@ const { sidebarVariant } = useAppearance();
 
         <SidebarFooter>
             <NavFooter :items="footerNavItems" />
-            <NavUser />
         </SidebarFooter>
     </Sidebar>
     <slot />
