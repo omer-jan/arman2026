@@ -1,26 +1,385 @@
-import { onMounted, ref } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 
-type Appearance = 'light' | 'dark' | 'system';
+export type Appearance = 'light' | 'dark' | 'system';
+export type SidebarVariant = 'sidebar' | 'floating' | 'inset';
+export type PrimaryColor = 'neutral' | 'stone' | 'zinc' | 'slate' | 'indigo' | 'cyan' | 'emerald' | 'rose'| 'violet' | 'yellow' | 'red' | 'lime' | 'green' | 'blue' | 'purple' | 'pink' | 'orange';
+export type ThemeSkin = 'default' | 'bordered';
+export type LayoutStyle = 'vertical' | 'collapsed' | 'horizontal';
+export type ContentWidth = 'compact' | 'wide';
 
-export function updateTheme(value: Appearance) {
-    if (typeof window === 'undefined') {
-        return;
-    }
+type ResolvedAppearance = Exclude<Appearance, 'system'>;
 
-    if (value === 'system') {
-        const mediaQueryList = window.matchMedia(
-            '(prefers-color-scheme: dark)',
-        );
-        const systemTheme = mediaQueryList.matches ? 'dark' : 'light';
-
-        document.documentElement.classList.toggle(
-            'dark',
-            systemTheme === 'dark',
-        );
-    } else {
-        document.documentElement.classList.toggle('dark', value === 'dark');
-    }
+interface AppearancePreferences {
+    mode: Appearance;
+    primaryColor: PrimaryColor;
+    skin: ThemeSkin;
+    sidebarVariant: SidebarVariant;
+    semiDarkMenu: boolean;
+    layout: LayoutStyle;
+    contentWidth: ContentWidth;
 }
+
+type PrimaryTokens = {
+    // solid accent color used for buttons, active states
+    primary: string;
+    // readable text on solid
+    primaryForeground: string;
+    // soft accent (badge/hover backgrounds). Must NOT be used for layout surfaces
+    primarySoft: string;
+    // focus ring
+    ring: string;
+    // optional sidebar accent, never used for background
+    sidebarPrimary?: string;
+    sidebarPrimaryForeground?: string;
+};
+
+const PREFERENCES_KEY = 'appearance-preferences';
+const LEGACY_APPEARANCE_KEY = 'appearance';
+const LEGACY_SIDEBAR_KEY = 'sidebar-variant';
+
+const defaultPreferences: AppearancePreferences = {
+    mode: 'system',
+    primaryColor: 'slate',
+    skin: 'default',
+    sidebarVariant: 'inset',
+    semiDarkMenu: false,
+    layout: 'vertical',
+    contentWidth: 'compact',
+};
+
+const primaryPalettes: Record<
+    PrimaryColor,
+    { light: PrimaryTokens; dark: PrimaryTokens }
+> = {
+    neutral: {
+        light: {
+            primary: 'hsl(0 0% 10%)',
+            primaryForeground: 'hsl(0 0% 98%)',
+            primarySoft: 'hsl(0 0% 96% / 0.6)',
+            ring: 'hsl(0 0% 45%)',
+            sidebarPrimary: 'hsl(0 0% 10%)',
+            sidebarPrimaryForeground: 'hsl(0 0% 98%)',
+        },
+        dark: {
+            primary: 'hsl(0 0% 92%)',
+            primaryForeground: 'hsl(0 0% 10%)',
+            primarySoft: 'hsl(0 0% 20% / 0.6)',
+            ring: 'hsl(0 0% 60%)',
+            sidebarPrimary: 'hsl(0 0% 92%)',
+            sidebarPrimaryForeground: 'hsl(0 0% 10%)',
+        },
+    },
+
+    stone: {
+        light: {
+            primary: 'hsl(25 13% 17%)',
+            primaryForeground: 'hsl(60 9% 98%)',
+            primarySoft: 'hsl(25 20% 95% / 0.6)',
+            ring: 'hsl(25 12% 42%)',
+            sidebarPrimary: 'hsl(25 13% 17%)',
+            sidebarPrimaryForeground: 'hsl(60 9% 98%)',
+        },
+        dark: {
+            primary: 'hsl(30 14% 88%)',
+            primaryForeground: 'hsl(25 13% 17%)',
+            primarySoft: 'hsl(25 10% 22% / 0.6)',
+            ring: 'hsl(28 12% 68%)',
+            sidebarPrimary: 'hsl(30 14% 88%)',
+            sidebarPrimaryForeground: 'hsl(25 13% 17%)',
+        },
+    },
+
+    zinc: {
+        light: {
+            primary: 'hsl(240 6% 10%)',
+            primaryForeground: 'hsl(0 0% 98%)',
+            primarySoft: 'hsl(240 6% 96% / 0.6)',
+            ring: 'hsl(240 5% 64%)',
+            sidebarPrimary: 'hsl(240 6% 10%)',
+            sidebarPrimaryForeground: 'hsl(0 0% 98%)',
+        },
+        dark: {
+            primary: 'hsl(240 5% 93%)',
+            primaryForeground: 'hsl(240 6% 10%)',
+            primarySoft: 'hsl(240 5% 20% / 0.6)',
+            ring: 'hsl(240 5% 70%)',
+            sidebarPrimary: 'hsl(240 5% 93%)',
+            sidebarPrimaryForeground: 'hsl(240 6% 10%)',
+        },
+    },
+
+    slate: {
+        light: {
+            primary: 'hsl(222 47% 11%)',
+            primaryForeground: 'hsl(210 40% 98%)',
+            primarySoft: 'hsl(222 47% 96% / 0.6)',
+            ring: 'hsl(222 84% 10%)',
+            sidebarPrimary: 'hsl(222 47% 11%)',
+            sidebarPrimaryForeground: 'hsl(210 40% 98%)',
+        },
+        dark: {
+            primary: 'hsl(217 33% 89%)',
+            primaryForeground: 'hsl(222 47% 11%)',
+            primarySoft: 'hsl(220 20% 20% / 0.6)',
+            ring: 'hsl(215 25% 65%)',
+            sidebarPrimary: 'hsl(217 33% 89%)',
+            sidebarPrimaryForeground: 'hsl(222 47% 11%)',
+        },
+    },
+
+    indigo: {
+        light: {
+            primary: 'hsl(243 75% 59%)',
+            primaryForeground: 'hsl(0 0% 98%)',
+            primarySoft: 'hsl(243 75% 90% / 0.5)',
+            ring: 'hsl(243 75% 59%)',
+            sidebarPrimary: 'hsl(243 75% 59%)',
+            sidebarPrimaryForeground: 'hsl(0 0% 98%)',
+        },
+        dark: {
+            primary: 'hsl(243 75% 75%)',
+            primaryForeground: 'hsl(0 0% 10%)',
+            primarySoft: 'hsl(243 75% 25% / 0.5)',
+            ring: 'hsl(243 75% 75%)',
+            sidebarPrimary: 'hsl(243 75% 75%)',
+            sidebarPrimaryForeground: 'hsl(0 0% 10%)',
+        },
+    },
+
+    cyan: {
+        light: {
+            primary: 'hsl(188 94% 42%)',
+            primaryForeground: 'hsl(0 0% 98%)',
+            primarySoft: 'hsl(188 94% 90% / 0.5)',
+            ring: 'hsl(188 94% 42%)',
+            sidebarPrimary: 'hsl(188 94% 42%)',
+            sidebarPrimaryForeground: 'hsl(0 0% 98%)',
+        },
+        dark: {
+            primary: 'hsl(188 94% 65%)',
+            primaryForeground: 'hsl(0 0% 10%)',
+            primarySoft: 'hsl(188 94% 25% / 0.5)',
+            ring: 'hsl(188 94% 65%)',
+            sidebarPrimary: 'hsl(188 94% 65%)',
+            sidebarPrimaryForeground: 'hsl(0 0% 10%)',
+        },
+    },
+
+    emerald: {
+        light: {
+            primary: 'hsl(160 84% 39%)',
+            primaryForeground: 'hsl(0 0% 98%)',
+            primarySoft: 'hsl(160 84% 90% / 0.5)',
+            ring: 'hsl(160 84% 39%)',
+            sidebarPrimary: 'hsl(160 84% 39%)',
+            sidebarPrimaryForeground: 'hsl(0 0% 98%)',
+        },
+        dark: {
+            primary: 'hsl(160 84% 65%)',
+            primaryForeground: 'hsl(0 0% 10%)',
+            primarySoft: 'hsl(160 84% 22% / 0.5)',
+            ring: 'hsl(160 84% 65%)',
+            sidebarPrimary: 'hsl(160 84% 65%)',
+            sidebarPrimaryForeground: 'hsl(0 0% 10%)',
+        },
+    },
+
+    rose: {
+        light: {
+            primary: 'hsl(346 77% 49%)',
+            primaryForeground: 'hsl(0 0% 98%)',
+            primarySoft: 'hsl(346 77% 92% / 0.5)',
+            ring: 'hsl(346 77% 49%)',
+            sidebarPrimary: 'hsl(346 77% 49%)',
+            sidebarPrimaryForeground: 'hsl(0 0% 98%)',
+        },
+        dark: {
+            primary: 'hsl(346 77% 70%)',
+            primaryForeground: 'hsl(0 0% 10%)',
+            primarySoft: 'hsl(346 77% 24% / 0.5)',
+            ring: 'hsl(346 77% 70%)',
+            sidebarPrimary: 'hsl(346 77% 70%)',
+            sidebarPrimaryForeground: 'hsl(0 0% 10%)',
+        },
+    },
+
+    violet: {
+        light: {
+            primary: 'hsl(262 83% 58%)',
+            primaryForeground: 'hsl(0 0% 98%)',
+            primarySoft: 'hsl(262 83% 92% / 0.5)',
+            ring: 'hsl(262 83% 58%)',
+            sidebarPrimary: 'hsl(262 83% 58%)',
+            sidebarPrimaryForeground: 'hsl(0 0% 98%)',
+        },
+        dark: {
+            primary: 'hsl(262 83% 75%)',
+            primaryForeground: 'hsl(0 0% 10%)',
+            primarySoft: 'hsl(262 83% 25% / 0.5)',
+            ring: 'hsl(262 83% 75%)',
+            sidebarPrimary: 'hsl(262 83% 75%)',
+            sidebarPrimaryForeground: 'hsl(0 0% 10%)',
+        },
+    },
+
+    yellow: {
+        light: {
+            primary: 'hsl(45 93% 47%)',
+            primaryForeground: 'hsl(0 0% 10%)',
+            primarySoft: 'hsl(45 93% 92% / 0.6)',
+            ring: 'hsl(45 93% 47%)',
+            sidebarPrimary: 'hsl(45 93% 47%)',
+            sidebarPrimaryForeground: 'hsl(0 0% 10%)',
+        },
+        dark: {
+            primary: 'hsl(45 93% 65%)',
+            primaryForeground: 'hsl(0 0% 10%)',
+            primarySoft: 'hsl(45 93% 20% / 0.6)',
+            ring: 'hsl(45 93% 65%)',
+            sidebarPrimary: 'hsl(45 93% 65%)',
+            sidebarPrimaryForeground: 'hsl(0 0% 10%)',
+        },
+    },
+
+    red: {
+        light: {
+            primary: 'hsl(0 84% 60%)',
+            primaryForeground: 'hsl(0 0% 98%)',
+            primarySoft: 'hsl(0 84% 92% / 0.5)',
+            ring: 'hsl(0 84% 60%)',
+            sidebarPrimary: 'hsl(0 84% 60%)',
+            sidebarPrimaryForeground: 'hsl(0 0% 98%)',
+        },
+        dark: {
+            primary: 'hsl(0 84% 75%)',
+            primaryForeground: 'hsl(0 0% 10%)',
+            primarySoft: 'hsl(0 84% 25% / 0.5)',
+            ring: 'hsl(0 84% 75%)',
+            sidebarPrimary: 'hsl(0 84% 75%)',
+            sidebarPrimaryForeground: 'hsl(0 0% 10%)',
+        },
+    },
+
+    lime: {
+        light: {
+            primary: 'hsl(84 81% 44%)',
+            primaryForeground: 'hsl(0 0% 10%)',
+            primarySoft: 'hsl(84 81% 92% / 0.6)',
+            ring: 'hsl(84 81% 44%)',
+            sidebarPrimary: 'hsl(84 81% 44%)',
+            sidebarPrimaryForeground: 'hsl(0 0% 10%)',
+        },
+        dark: {
+            primary: 'hsl(84 81% 65%)',
+            primaryForeground: 'hsl(0 0% 10%)',
+            primarySoft: 'hsl(84 81% 22% / 0.6)',
+            ring: 'hsl(84 81% 65%)',
+            sidebarPrimary: 'hsl(84 81% 65%)',
+            sidebarPrimaryForeground: 'hsl(0 0% 10%)',
+        },
+    },
+
+    green: {
+        light: {
+            primary: 'hsl(142 71% 45%)',
+            primaryForeground: 'hsl(0 0% 98%)',
+            primarySoft: 'hsl(142 71% 92% / 0.5)',
+            ring: 'hsl(142 71% 45%)',
+            sidebarPrimary: 'hsl(142 71% 45%)',
+            sidebarPrimaryForeground: 'hsl(0 0% 98%)',
+        },
+        dark: {
+            primary: 'hsl(142 71% 65%)',
+            primaryForeground: 'hsl(0 0% 10%)',
+            primarySoft: 'hsl(142 71% 22% / 0.5)',
+            ring: 'hsl(142 71% 65%)',
+            sidebarPrimary: 'hsl(142 71% 65%)',
+            sidebarPrimaryForeground: 'hsl(0 0% 10%)',
+        },
+    },
+
+    blue: {
+        light: {
+            primary: 'hsl(217 91% 60%)',
+            primaryForeground: 'hsl(0 0% 98%)',
+            primarySoft: 'hsl(217 91% 92% / 0.5)',
+            ring: 'hsl(217 91% 60%)',
+            sidebarPrimary: 'hsl(217 91% 60%)',
+            sidebarPrimaryForeground: 'hsl(0 0% 98%)',
+        },
+        dark: {
+            primary: 'hsl(217 91% 75%)',
+            primaryForeground: 'hsl(0 0% 10%)',
+            primarySoft: 'hsl(217 91% 25% / 0.5)',
+            ring: 'hsl(217 91% 75%)',
+            sidebarPrimary: 'hsl(217 91% 75%)',
+            sidebarPrimaryForeground: 'hsl(0 0% 10%)',
+        },
+    },
+
+    purple: {
+        light: {
+            primary: 'hsl(271 81% 56%)',
+            primaryForeground: 'hsl(0 0% 98%)',
+            primarySoft: 'hsl(271 81% 92% / 0.5)',
+            ring: 'hsl(271 81% 56%)',
+            sidebarPrimary: 'hsl(271 81% 56%)',
+            sidebarPrimaryForeground: 'hsl(0 0% 98%)',
+        },
+        dark: {
+            primary: 'hsl(271 81% 75%)',
+            primaryForeground: 'hsl(0 0% 10%)',
+            primarySoft: 'hsl(271 81% 25% / 0.5)',
+            ring: 'hsl(271 81% 75%)',
+            sidebarPrimary: 'hsl(271 81% 75%)',
+            sidebarPrimaryForeground: 'hsl(0 0% 10%)',
+        },
+    },
+
+    pink: {
+        light: {
+            primary: 'hsl(330 81% 60%)',
+            primaryForeground: 'hsl(0 0% 98%)',
+            primarySoft: 'hsl(330 81% 92% / 0.5)',
+            ring: 'hsl(330 81% 60%)',
+            sidebarPrimary: 'hsl(330 81% 60%)',
+            sidebarPrimaryForeground: 'hsl(0 0% 98%)',
+        },
+        dark: {
+            primary: 'hsl(330 81% 75%)',
+            primaryForeground: 'hsl(0 0% 10%)',
+            primarySoft: 'hsl(330 81% 25% / 0.5)',
+            ring: 'hsl(330 81% 75%)',
+            sidebarPrimary: 'hsl(330 81% 75%)',
+            sidebarPrimaryForeground: 'hsl(0 0% 10%)',
+        },
+    },
+
+    orange: {
+        light: {
+            primary: 'hsl(24 95% 53%)',
+            primaryForeground: 'hsl(0 0% 98%)',
+            primarySoft: 'hsl(24 95% 92% / 0.5)',
+            ring: 'hsl(24 95% 53%)',
+            sidebarPrimary: 'hsl(24 95% 53%)',
+            sidebarPrimaryForeground: 'hsl(0 0% 98%)',
+        },
+        dark: {
+            primary: 'hsl(24 95% 70%)',
+            primaryForeground: 'hsl(0 0% 10%)',
+            primarySoft: 'hsl(24 95% 22% / 0.5)',
+            ring: 'hsl(24 95% 70%)',
+            sidebarPrimary: 'hsl(24 95% 70%)',
+            sidebarPrimaryForeground: 'hsl(0 0% 10%)',
+        },
+    },
+};
+
+
+const contentWidthMap: Record<ContentWidth, string> = {
+    compact: '1200px',
+    wide: '100%',
+};
 
 const setCookie = (name: string, value: string, days = 365) => {
     if (typeof document === 'undefined') {
@@ -40,18 +399,207 @@ const mediaQuery = () => {
     return window.matchMedia('(prefers-color-scheme: dark)');
 };
 
-const getStoredAppearance = () => {
+const getSystemAppearance = (): ResolvedAppearance =>
+    mediaQuery()?.matches ? 'dark' : 'light';
+
+const resolveAppearance = (
+    preference: Appearance,
+    systemAppearance: ResolvedAppearance,
+): ResolvedAppearance =>
+    preference === 'system' ? systemAppearance : preference;
+
+const readPreferences = (): AppearancePreferences => {
     if (typeof window === 'undefined') {
-        return null;
+        return { ...defaultPreferences };
     }
 
-    return localStorage.getItem('appearance') as Appearance | null;
+    try {
+        const stored = localStorage.getItem(PREFERENCES_KEY);
+        if (stored) {
+            const parsed = JSON.parse(stored) as Partial<AppearancePreferences>;
+            return { ...defaultPreferences, ...parsed };
+        }
+    } catch (error) {
+        console.warn('Unable to read appearance preferences', error);
+    }
+
+    const legacyMode = localStorage.getItem(LEGACY_APPEARANCE_KEY) as
+        | Appearance
+        | null;
+    const legacySidebar = localStorage.getItem(LEGACY_SIDEBAR_KEY) as
+        | SidebarVariant
+        | null;
+
+    return {
+        ...defaultPreferences,
+        mode: legacyMode || defaultPreferences.mode,
+        sidebarVariant: legacySidebar || defaultPreferences.sidebarVariant,
+    };
 };
 
-const handleSystemThemeChange = () => {
-    const currentAppearance = getStoredAppearance();
+const writePreferences = (preferences: AppearancePreferences) => {
+    if (typeof window === 'undefined') {
+        return;
+    }
 
-    updateTheme(currentAppearance || 'system');
+    localStorage.setItem(PREFERENCES_KEY, JSON.stringify(preferences));
+    localStorage.setItem(LEGACY_APPEARANCE_KEY, preferences.mode);
+    localStorage.setItem(LEGACY_SIDEBAR_KEY, preferences.sidebarVariant);
+    setCookie('appearance', preferences.mode);
+};
+
+const applyPrimaryColor = (
+    palette: PrimaryColor,
+    resolvedAppearance: ResolvedAppearance,
+) => {
+    if (typeof document === 'undefined') {
+        return;
+    }
+
+    const tokens = primaryPalettes[palette][resolvedAppearance];
+    const root = document.documentElement;
+
+    root.style.setProperty('--primary', tokens.primary);
+    root.style.setProperty('--primary-foreground', tokens.primaryForeground);
+    root.style.setProperty('--primary-soft', tokens.primarySoft);
+    root.style.setProperty('--ring', tokens.ring);
+    // Sidebar accent variables derive from primary tokens
+    root.style.setProperty('--sidebar-accent', tokens.primarySoft);
+    root.style.setProperty('--sidebar-accent-foreground', tokens.sidebarPrimary ?? tokens.primary);
+    root.style.setProperty('--sidebar-ring', tokens.ring);
+    root.style.setProperty(
+        '--sidebar-primary',
+        tokens.sidebarPrimary ?? tokens.primary,
+    );
+    root.style.setProperty(
+        '--sidebar-primary-foreground',
+        tokens.sidebarPrimaryForeground ?? tokens.primaryForeground,
+    );
+};
+
+/**
+ * Apply server-provided preferences (DB-backed) safely.
+ * Only overrides accent and mode; layout tokens remain semantic.
+ */
+export function applyServerPreferences(prefs?: Partial<Pick<AppearancePreferences, 'mode' | 'primaryColor'>>) {
+    if (typeof document === 'undefined' || !prefs) return;
+    const mode = prefs.mode ?? defaultPreferences.mode;
+    const resolved = updateTheme(mode, getSystemAppearance());
+    const palette = prefs.primaryColor ?? defaultPreferences.primaryColor;
+    applyPrimaryColor(palette, resolved);
+    // Persist so client reuses on refresh
+    try {
+        const existing = readPreferences();
+        writePreferences({
+            ...existing,
+            mode,
+            primaryColor: palette,
+        });
+    } catch {}
+}
+
+const applyContentWidth = (value: ContentWidth) => {
+    if (typeof document === 'undefined') {
+        return;
+    }
+
+    const root = document.documentElement;
+    root.dataset.contentWidth = value;
+    root.style.setProperty('--app-content-max-width', contentWidthMap[value]);
+};
+
+const applySkin = (skin: ThemeSkin) => {
+    if (typeof document === 'undefined') {
+        return;
+    }
+
+    const root = document.documentElement;
+    root.dataset.skin = skin;
+
+    if (skin === 'bordered') {
+        const isDark = root.classList.contains('dark');
+
+        if (isDark) {
+            root.style.setProperty('--card', 'hsl(0 0% 8%)');
+            root.style.setProperty('--card-foreground', 'hsl(0 0% 96%)');
+            root.style.setProperty('--border', 'hsl(0 0% 24%)');
+            root.style.setProperty('--sidebar-border', 'hsl(0 0% 22%)');
+        } else {
+            root.style.setProperty('--card', 'hsl(0 0% 99%)');
+            root.style.setProperty('--card-foreground', 'hsl(0 0% 10%)');
+            root.style.setProperty('--border', 'hsl(0 0% 82%)');
+            root.style.setProperty('--sidebar-border', 'hsl(0 0% 80%)');
+        }
+    } else {
+        root.style.removeProperty('--card');
+        root.style.removeProperty('--card-foreground');
+        root.style.removeProperty('--border');
+        root.style.removeProperty('--sidebar-border');
+    }
+};
+
+const applyMenuTone = (semiDark: boolean, mode: ResolvedAppearance) => {
+    if (typeof document === 'undefined') {
+        return;
+    }
+
+    const root = document.documentElement;
+    const isLight = mode === 'light';
+    root.dataset.menuTone = semiDark && isLight ? 'semi-dark' : 'default';
+
+    // Only apply semi-dark overrides in light mode; in dark mode, keep defaults.
+    if (semiDark && isLight) {
+        root.style.setProperty('--sidebar-background', 'hsl(230 10% 12%)');
+        root.style.setProperty('--sidebar', 'hsl(230 10% 12%)');
+        root.style.setProperty('--sidebar-foreground', 'hsl(0 0% 96%)');
+        // Leave accent variables to be controlled by primary palette
+        root.style.setProperty('--sidebar-border', 'hsl(230 10% 22%)');
+    } else {
+        root.style.removeProperty('--sidebar-background');
+        root.style.removeProperty('--sidebar');
+        root.style.removeProperty('--sidebar-foreground');
+        root.style.removeProperty('--sidebar-border');
+    }
+};
+
+const applyLayout = (layout: LayoutStyle) => {
+    if (typeof document === 'undefined') {
+        return;
+    }
+
+    document.documentElement.dataset.layout = layout;
+};
+
+export const updateTheme = (
+    value: Appearance,
+    systemAppearance?: ResolvedAppearance,
+): ResolvedAppearance => {
+    if (typeof window === 'undefined') {
+        return 'light';
+    }
+
+    const resolved =
+        value === 'system'
+            ? systemAppearance ?? getSystemAppearance()
+            : value;
+
+    document.documentElement.classList.toggle('dark', resolved === 'dark');
+    return resolved;
+};
+
+const applyPreferences = (
+    preferences: AppearancePreferences,
+    systemAppearance: ResolvedAppearance,
+) => {
+    const resolved = updateTheme(preferences.mode, systemAppearance);
+
+    applyPrimaryColor(preferences.primaryColor, resolved);
+    applySkin(preferences.skin);
+    applyMenuTone(preferences.semiDarkMenu, resolved);
+    applyContentWidth(preferences.contentWidth);
+    applyLayout(preferences.layout);
+
+    return resolved;
 };
 
 export function initializeTheme() {
@@ -59,41 +607,149 @@ export function initializeTheme() {
         return;
     }
 
-    // Initialize theme from saved preference or default to system...
-    const savedAppearance = getStoredAppearance();
-    updateTheme(savedAppearance || 'system');
+    const preferences = readPreferences();
+    const systemAppearance = getSystemAppearance();
 
-    // Set up system theme change listener...
-    mediaQuery()?.addEventListener('change', handleSystemThemeChange);
+    applyPreferences(preferences, systemAppearance);
+
+    mediaQuery()?.addEventListener('change', () => {
+        const nextSystem = getSystemAppearance();
+        applyPreferences(readPreferences(), nextSystem);
+    });
 }
 
-const appearance = ref<Appearance>('system');
+const preferences = ref<AppearancePreferences>(readPreferences());
+const systemAppearance = ref<ResolvedAppearance>(getSystemAppearance());
 
 export function useAppearance() {
     onMounted(() => {
-        const savedAppearance = localStorage.getItem(
-            'appearance',
-        ) as Appearance | null;
+        systemAppearance.value = getSystemAppearance();
+        applyPreferences(preferences.value, systemAppearance.value);
 
-        if (savedAppearance) {
-            appearance.value = savedAppearance;
-        }
+        mediaQuery()?.addEventListener('change', () => {
+            systemAppearance.value = getSystemAppearance();
+            applyPreferences(preferences.value, systemAppearance.value);
+        });
     });
 
-    function updateAppearance(value: Appearance) {
+    watch(
+        preferences,
+        (next) => {
+            applyPreferences(next, systemAppearance.value);
+            writePreferences(next);
+        },
+        { deep: true },
+    );
+
+    const appearance = computed<Appearance>({
+        get: () => preferences.value.mode,
+        set: (value) => {
+            preferences.value = { ...preferences.value, mode: value };
+        },
+    });
+
+    const resolvedAppearance = computed<ResolvedAppearance>(() =>
+        resolveAppearance(appearance.value, systemAppearance.value),
+    );
+
+    const sidebarVariant = computed<SidebarVariant>({
+        get: () => preferences.value.sidebarVariant,
+        set: (value) => {
+            preferences.value = { ...preferences.value, sidebarVariant: value };
+        },
+    });
+
+    const primaryColor = computed<PrimaryColor>({
+        get: () => preferences.value.primaryColor,
+        set: (value) => {
+            preferences.value = { ...preferences.value, primaryColor: value };
+            applyPrimaryColor(
+                value,
+                resolveAppearance(appearance.value, systemAppearance.value),
+            );
+        },
+    });
+
+    const skin = computed<ThemeSkin>({
+        get: () => preferences.value.skin,
+        set: (value) => {
+            preferences.value = { ...preferences.value, skin: value };
+            applySkin(value);
+        },
+    });
+
+    const semiDarkMenu = computed<boolean>({
+        get: () => preferences.value.semiDarkMenu,
+        set: (value) => {
+            preferences.value = { ...preferences.value, semiDarkMenu: value };
+            const currentResolved = resolveAppearance(
+                appearance.value,
+                systemAppearance.value,
+            );
+            applyMenuTone(value, currentResolved);
+        },
+    });
+
+    const layout = computed<LayoutStyle>({
+        get: () => preferences.value.layout,
+        set: (value) => {
+            preferences.value = { ...preferences.value, layout: value };
+            applyLayout(value);
+        },
+    });
+
+    const contentWidth = computed<ContentWidth>({
+        get: () => preferences.value.contentWidth,
+        set: (value) => {
+            preferences.value = { ...preferences.value, contentWidth: value };
+            applyContentWidth(value);
+        },
+    });
+
+    const updateAppearance = (value: Appearance) => {
         appearance.value = value;
+    };
 
-        // Store in localStorage for client-side persistence...
-        localStorage.setItem('appearance', value);
+    const updateSidebarVariant = (value: SidebarVariant) => {
+        sidebarVariant.value = value;
+    };
 
-        // Store in cookie for SSR...
-        setCookie('appearance', value);
+    const updatePrimaryColor = (value: PrimaryColor) => {
+        primaryColor.value = value;
+    };
 
-        updateTheme(value);
-    }
+    const updateSkin = (value: ThemeSkin) => {
+        skin.value = value;
+    };
+
+    const updateMenuTone = (value: boolean) => {
+        debugger;
+        semiDarkMenu.value = value;
+    };
+
+    const updateLayout = (value: LayoutStyle) => {
+        layout.value = value;
+    };
+
+    const updateContentWidth = (value: ContentWidth) => {
+        contentWidth.value = value;
+    };
 
     return {
         appearance,
+        resolvedAppearance,
         updateAppearance,
+        sidebarVariant,
+        updateSidebarVariant,
+        primaryColor,
+        updatePrimaryColor,
+        skin,
+        updateSkin,
+        semiDarkMenu,
+        updateMenuTone,
+        layout,
+        updateLayout,
+        contentWidth,
+        updateContentWidth,
     };
 }

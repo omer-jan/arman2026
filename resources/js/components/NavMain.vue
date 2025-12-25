@@ -9,12 +9,14 @@ import {
 import { urlIsActive } from '@/lib/utils';
 import { type NavItem } from '@/types';
 import { Link, usePage } from '@inertiajs/vue3';
+import { useMenuStyle } from '@/composables/useMenuStyle';
 
 defineProps<{
     items: NavItem[];
 }>();
 
 const page = usePage();
+const { getParentActiveStyle } = useMenuStyle();
 </script>
 
 <template>
@@ -26,6 +28,7 @@ const page = usePage();
                     as-child
                     :is-active="urlIsActive(item.href, page.url)"
                     :tooltip="item.title"
+                    :style="urlIsActive(item.href, page.url) ? getParentActiveStyle() : undefined"
                 >
                     <Link :href="item.href">
                         <component :is="item.icon" />

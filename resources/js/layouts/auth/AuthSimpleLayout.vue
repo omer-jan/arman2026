@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import logo from "../../../images/arman.png";
+import logo from "../../../images/logo.png";
 import { home } from '@/routes';
 import { Link } from '@inertiajs/vue3';
 
@@ -17,11 +17,12 @@ defineProps<{
         >
 
             <div class="flex flex-col items-center gap-4">
-                <img
+                 <img
                     :src="logo"
                     alt="App Logo"
                     class="h-28 w-28 object-contain"
                 />
+
 
                 <div class="text-center">
                     <h1 class="text-2xl font-semibold tracking-tight">
@@ -44,4 +45,5 @@ defineProps<{
         </div>
     </div>
 </template>
+
 

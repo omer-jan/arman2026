@@ -45,6 +45,10 @@ class HandleInertiaRequests extends Middleware
             'auth' => [
                 'user' => $request->user(),
             ],
+            'appearance' => [
+                'mode' => optional($request->user())->theme_mode ?? 'system',
+                'primaryColor' => optional($request->user())->primary_color ?? 'slate',
+            ],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
         ];
     }

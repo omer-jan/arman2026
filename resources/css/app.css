@@ -28,6 +28,7 @@
 
     --color-primary: var(--primary);
     --color-primary-foreground: var(--primary-foreground);
+    --color-primary-soft: var(--primary-soft);
 
     --color-secondary: var(--secondary);
     --color-secondary-foreground: var(--secondary-foreground);
@@ -124,6 +125,7 @@
     --sidebar-border: hsl(0 0% 91%);
     --sidebar-ring: hsl(217.2 91.2% 59.8%);
     --sidebar: hsl(0 0% 98%);
+    --app-content-max-width: 1200px;
 }
 
 .dark {
@@ -169,4 +171,9 @@
     body {
         @apply bg-background text-foreground;
     }
+}
+
+/* Inertia/NProgress bar thickness override */
+#nprogress .bar {
+    height: 3px !important;
 }
