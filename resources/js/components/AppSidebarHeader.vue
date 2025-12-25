@@ -21,6 +21,14 @@ import type { BreadcrumbItemType } from '@/types';
 import { usePage } from '@inertiajs/vue3';
 import { Bell, ChevronsUpDown, Moon, Sun } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
+import { useI18nDirection } from '@/composables/useI18nDirection';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from 'reka-ui';
 
 interface NotificationItem {
     id: number;
@@ -80,6 +88,9 @@ const themeIcon = computed(() => (isDark.value ? Sun : Moon));
 const themeLabel = computed(() =>
     isDark.value ? 'Switch to light mode' : 'Switch to dark mode',
 );
+
+// Language + direction management
+const { currentLocale, languages, changeLanguage, dir, greeting } = useI18nDirection();
 </script>
 
 <template>
@@ -94,6 +105,27 @@ const themeLabel = computed(() =>
         </div>
 
         <div class="flex items-center gap-2">
+            <!-- Language selector -->
+            <div class="hidden sm:block">
+                <Select :value="currentLocale" @update:value="changeLanguage">
+                    <SelectTrigger aria-label="Select language" class="w-36">
+                        <SelectValue placeholder="Language" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem v-for="lang in languages" :key="lang.value" :value="lang.value">
+                            <span class="flex w-full items-center justify-between">
+                                <span>{{ lang.label }}</span>
+                                <Badge variant="outline" class="ml-2">{{ lang.dir.toUpperCase() }}</Badge>
+                            </span>
+                        </SelectItem>
+                    </SelectContent>
+                </Select>
+            </div>
+
+            <!-- Current direction indicator -->
+            <Badge variant="outline" class="hidden sm:inline-flex">{{ dir }}</Badge>
+            <span class="hidden sm:inline text-sm text-muted-foreground">{{ greeting }}</span>
+
             <Tooltip :delay-duration="0">
                 <TooltipTrigger as-child>
                     <Button

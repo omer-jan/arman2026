@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { SidebarProvider } from '@/components/ui/sidebar';
+import { ConfigProvider } from 'reka-ui';
+import { useI18nDirection } from '@/composables/useI18nDirection';
 import { useAppearance } from '@/composables/useAppearance';
 import { usePage } from '@inertiajs/vue3';
 import { computed } from 'vue';
@@ -19,13 +21,19 @@ const defaultOpen = computed(() =>
         ? false
         : isOpen,
 );
+
+const { dir } = useI18nDirection();
 </script>
 
 <template>
     <div v-if="variant === 'header'" class="flex min-h-screen w-full flex-col">
-        <slot />
+        <ConfigProvider :dir="dir">
+            <slot />
+        </ConfigProvider>
     </div>
     <SidebarProvider v-else :default-open="defaultOpen">
-        <slot />
+        <ConfigProvider :dir="dir">
+            <slot />
+        </ConfigProvider>
     </SidebarProvider>
 </template>

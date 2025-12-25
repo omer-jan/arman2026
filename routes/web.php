@@ -16,3 +16,7 @@ Route::get('dashboard', function () {
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 require __DIR__.'/settings.php'; 
+
+Route::middleware(['auth', 'verified'])
+    ->resource('departments', \App\Http\Controllers\DepartmentController::class)
+    ->only(['index', 'store', 'update', 'destroy']);
