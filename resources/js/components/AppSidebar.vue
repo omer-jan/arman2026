@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import NavFooter from '@/components/NavFooter.vue';
 import NavMain from '@/components/NavMain.vue';
+import SidebarNav from '@/components/SidebarNav.vue';
+
+import SearchForm from "@/components/SearchForm.vue"
 import { useAppearance } from '@/composables/useAppearance';
 import {
     Sidebar,
@@ -53,10 +56,12 @@ const { sidebarVariant } = useAppearance();
                     </SidebarMenuButton>
                 </SidebarMenuItem>
             </SidebarMenu>
+            <SearchForm />
         </SidebarHeader>
 
         <SidebarContent>
             <NavMain :items="mainNavItems" />
+            <SidebarNav label="Modules" />
         </SidebarContent>
 
         <SidebarFooter>

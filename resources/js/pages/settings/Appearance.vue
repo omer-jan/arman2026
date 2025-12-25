@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import AppearanceTabs from '@/components/AppearanceTabs.vue';
 import HeadingSmall from '@/components/HeadingSmall.vue';
-import SidebarVariantTabs from '@/components/SidebarVariantTabs.vue';
 import { Button } from '@/components/ui/button';
 import {
     Card,
@@ -12,18 +11,20 @@ import {
 } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
+import { Input } from '@/components/ui/input';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
-    type ContentWidth,
-    type LayoutStyle,
     type PrimaryColor,
     type ThemeSkin,
     useAppearance,
 } from '@/composables/useAppearance';
 import AppLayout from '@/layouts/AppLayout.vue';
 import SettingsLayout from '@/layouts/settings/Layout.vue';
-import { edit } from '@/routes/appearance';
+import { edit, update } from '@/routes/appearance';
 import { type BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/vue3';
+import { useForm } from '@inertiajs/vue3';
+import { watch, ref } from 'vue';
 
 const breadcrumbItems: BreadcrumbItem[] = [
     {
@@ -33,17 +34,35 @@ const breadcrumbItems: BreadcrumbItem[] = [
 ];
 
 const {
+    appearance,
     primaryColor,
     updatePrimaryColor,
     skin,
     updateSkin,
     semiDarkMenu,
-    updateMenuTone,
-    layout,
-    updateLayout,
-    contentWidth,
-    updateContentWidth,
 } = useAppearance();
+
+// Persist preferences to DB (PATCH) while applying immediately via composable
+const form = useForm<{ primary_color: PrimaryColor; theme_mode: 'light' | 'dark' | 'system' }>(
+    {
+        primary_color: primaryColor.value,
+        theme_mode: appearance.value,
+    },
+);
+
+watch(primaryColor, (next) => {
+    form.primary_color = next;
+    form.patch(update().url, {
+        preserveScroll: true,
+    });
+});
+
+watch(appearance, (next) => {
+    form.theme_mode = next;
+    form.patch(update().url, {
+        preserveScroll: true,
+    });
+});
 
 const primaryOptions: ReadonlyArray<{
     value: PrimaryColor;
@@ -76,24 +95,15 @@ const skinOptions: ReadonlyArray<{ value: ThemeSkin; label: string }> = [
     { value: 'bordered', label: 'Bordered' },
 ];
 
-const layoutOptions: ReadonlyArray<{
-    value: LayoutStyle;
-    label: string;
-    helper: string;
-}> = [
-    { value: 'vertical', label: 'Vertical', helper: 'Standard sidebar' },
-    { value: 'collapsed', label: 'Collapsed', helper: 'Compact navigation' },
-    { value: 'horizontal', label: 'Horizontal', helper: 'Top navigation' },
-];
+// Removed layout and content width options from UI to enforce sensible defaults
 
-const widthOptions: ReadonlyArray<{
-    value: ContentWidth;
-    label: string;
-    helper: string;
-}> = [
-    { value: 'compact', label: 'Compact', helper: 'Best for dashboards' },
-    { value: 'wide', label: 'Wide', helper: 'Roomier content area' },
-];
+// Preview demo state (purely for showcasing styles)
+const previewName = ref('Jane Doe');
+const previewEmail = ref('jane@example.com');
+const previewError = ref('Please enter a valid email.');
+const previewNewsletter = ref(true);
+const previewSwitch = ref(false);
+const previewActiveTab = ref<'Overview' | 'Billing' | 'Team'>('Overview');
 </script>
 
 <template>
@@ -107,12 +117,14 @@ const widthOptions: ReadonlyArray<{
                     description="Update your account's appearance settings"
                 />
 
-                <div class="grid gap-6 grid-cols-1">
+                <!-- Two-column layout: controls and live preview -->
+                <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+                    <!-- Left: Appearance controls -->
                     <Card>
                         <CardHeader>
-                            <CardTitle>Theme</CardTitle>
+                            <CardTitle>Appearance</CardTitle>
                             <CardDescription>
-                                Control color mode, primary accent, and component skin.
+                                Choose mode, primary color, and component skin.
                             </CardDescription>
                         </CardHeader>
                         <CardContent class="space-y-6">
@@ -123,104 +135,142 @@ const widthOptions: ReadonlyArray<{
 
                             <div class="space-y-2">
                                 <Label class="text-sm font-medium">Primary color</Label>
-                                <div class="grid gap-2 sm:grid-cols-2">
+                                <div class="space-y-2">
                                     <Button
                                         v-for="option in primaryOptions"
                                         :key="option.value"
                                         :variant="primaryColor === option.value ? 'default' : 'outline'"
-                                        class="flex items-center justify-between"
-                                        @click="updatePrimaryColor(option.value)
-                                        "
+                                        class="w-full justify-between"
+                                        @click="updatePrimaryColor(option.value)"
                                     >
                                         <span class="font-medium">{{ option.label }}</span>
-                                        <span class="flex items-center gap-2 text-xs text-muted-foreground">
-                                            <span
-                                                class="h-6 w-6 rounded-full border"
-                                                :style="{ backgroundColor: option.swatch }"
-                                            ></span>
-                                            shadcn-{{ option.value }}
-                                        </span>
+                                        <span
+                                            class="h-5 w-5 rounded-full border"
+                                            :style="{ backgroundColor: option.swatch }"
+                                        />
                                     </Button>
                                 </div>
                             </div>
 
-                            <div class="grid gap-4 sm:grid-cols-2">
-                                <div class="space-y-2">
-                                    <Label class="text-sm font-medium">Skin</Label>
-                                    <div class="flex flex-wrap gap-2">
-                                        <Button
-                                            v-for="option in skinOptions"
-                                            :key="option.value"
-                                            :variant="skin === option.value ? 'default' : 'outline'"
-                                            class="w-full justify-center sm:w-auto"
-                                            @click="updateSkin(option.value)"
-                                        >
-                                            {{ option.label }}
-                                        </Button>
-                                    </div>
+                            <div class="space-y-2">
+                                <Label class="text-sm font-medium">Skin</Label>
+                                <div class="flex flex-wrap gap-2">
+                                    <Button
+                                        v-for="option in skinOptions"
+                                        :key="option.value"
+                                        :variant="skin === option.value ? 'default' : 'outline'"
+                                        class="px-4"
+                                        @click="updateSkin(option.value)"
+                                    >
+                                        {{ option.label }}
+                                    </Button>
                                 </div>
+                            </div>
 
-                             <div class="flex items-center justify-between">
-    <div class="pr-4">
-        <p class="text-sm font-medium">Semi-dark menu</p>
-        <p class="text-xs text-muted-foreground">
-            Darken the sidebar while keeping content bright.
-        </p>
-    </div>
-
-    <Switch v-model="semiDarkMenu" />
-</div>
+                            <div class="flex items-center justify-between rounded-md border p-3">
+                                <div class="pr-4">
+                                    <p class="text-sm font-medium">Semi-dark menu</p>
+                                    <p class="text-xs text-muted-foreground">
+                                        Darken the sidebar while keeping content bright.
+                                    </p>
+                                </div>
+                                <Switch v-model="semiDarkMenu" />
                             </div>
                         </CardContent>
                     </Card>
+
+                    <!-- Right: Live preview -->
                     <Card>
                         <CardHeader>
-                            <CardTitle>Layout</CardTitle>
+                            <CardTitle>Preview</CardTitle>
                             <CardDescription>
-                                Tailor navigation density and page width to match your workflow.
+                                Components reflect your current selections instantly.
                             </CardDescription>
                         </CardHeader>
                         <CardContent class="space-y-6">
-                            <div class="space-y-2">
-                                <Label class="text-sm font-medium">Layout</Label>
-                                <div class="grid gap-2 sm:grid-cols-3">
-                                    <Button
-                                        v-for="option in layoutOptions"
-                                        :key="option.value"
-                                        :variant="layout === option.value ? 'default' : 'outline'"
-                                        class="h-full flex-col items-start justify-start gap-1 text-left"
-                                        @click="updateLayout(option.value)"
-                                    >
-                                        <span class="text-sm font-semibold">{{ option.label }}</span>
-                                        <span class="text-xs text-muted-foreground">
-                                            {{ option.helper }}
-                                        </span>
-                                    </Button>
+                            <!-- Tabs -->
+                            <div class="flex gap-2">
+                                <Button
+                                    size="sm"
+                                    :variant="previewActiveTab === 'Overview' ? 'default' : 'outline'"
+                                    @click="previewActiveTab = 'Overview'"
+                                >
+                                    Overview
+                                </Button>
+                                <Button
+                                    size="sm"
+                                    :variant="previewActiveTab === 'Billing' ? 'default' : 'outline'"
+                                    @click="previewActiveTab = 'Billing'"
+                                >
+                                    Billing
+                                </Button>
+                                <Button
+                                    size="sm"
+                                    :variant="previewActiveTab === 'Team' ? 'default' : 'outline'"
+                                    @click="previewActiveTab = 'Team'"
+                                >
+                                    Team
+                                </Button>
+                            </div>
+
+                            <!-- Form -->
+                            <div class="grid gap-4 sm:grid-cols-2">
+                                <div class="space-y-2">
+                                    <Label class="text-sm font-medium">Name</Label>
+                                    <Input v-model="previewName" placeholder="Your name" />
+                                </div>
+                                <div class="space-y-2">
+                                    <Label class="text-sm font-medium">Email</Label>
+                                    <Input v-model="previewEmail" aria-invalid="true" placeholder="email@domain.com" />
+                                    <p class="text-xs text-destructive">{{ previewError }}</p>
                                 </div>
                             </div>
 
-                            <div class="space-y-2">
-                                <Label class="text-sm font-medium">Sidebar style</Label>
-                                <SidebarVariantTabs />
+                            <!-- Controls -->
+                            <div class="flex flex-wrap items-center gap-4">
+                                <label class="flex items-center gap-2">
+                                    <Checkbox v-model:checked="previewNewsletter" />
+                                    <span class="text-sm">Subscribe to newsletter</span>
+                                </label>
+                                <label class="flex items-center gap-2">
+                                    <Switch v-model:checked="previewSwitch" />
+                                    <span class="text-sm">Enable feature</span>
+                                </label>
                             </div>
 
-                            <div class="space-y-2">
-                                <Label class="text-sm font-medium">Content width</Label>
-                                <div class="grid gap-2 sm:grid-cols-2">
-                                    <Button
-                                        v-for="option in widthOptions"
-                                        :key="option.value"
-                                        :variant="contentWidth === option.value ? 'default' : 'outline'"
-                                        class="flex h-full flex-col items-start gap-1 text-left"
-                                        @click="updateContentWidth(option.value)
-                                        "
-                                    >
-                                        <span class="text-sm font-semibold">{{ option.label }}</span>
-                                        <span class="text-xs text-muted-foreground">
-                                            {{ option.helper }}
-                                        </span>
-                                    </Button>
-                                </div>
+                            <!-- Actions -->
+                            <div class="flex gap-3">
+                                <Button>Primary Button</Button>
+                                <Button variant="outline">Outline Button</Button>
+                            </div>
+
+                            <!-- Table -->
+                            <div class="rounded-md border">
+                                <table class="w-full preview-table text-sm">
+                                    <thead>
+                                        <tr>
+                                            <th class="text-left">Name</th>
+                                            <th class="text-left">Status</th>
+                                            <th class="text-left">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>Project Alpha</td>
+                                            <td>
+                                                <span class="inline-flex items-center rounded-md bg-primary/10 px-2 py-0.5 text-primary">Active</span>
+                                            </td>
+                                            <td><a href="#" class="text-primary hover:underline">View</a></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Project Beta</td>
+                                            <td>
+                                                <span class="inline-flex items-center rounded-md bg-muted px-2 py-0.5">Paused</span>
+                                            </td>
+                                            <td><a href="#" class="text-primary hover:underline">View</a></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
                             </div>
                         </CardContent>
                     </Card>
@@ -229,3 +279,15 @@ const widthOptions: ReadonlyArray<{
         </SettingsLayout>
     </AppLayout>
 </template>
+
+<style scoped>
+/* Simple table styling consistent with tokens */
+.preview-table th,
+.preview-table td {
+    padding: 0.5rem 0.75rem;
+    border-bottom: 1px solid var(--border);
+}
+.preview-table thead th {
+    background: var(--muted);
+}
+</style>

@@ -20,9 +20,15 @@ interface AppearancePreferences {
 }
 
 type PrimaryTokens = {
+    // solid accent color used for buttons, active states
     primary: string;
+    // readable text on solid
     primaryForeground: string;
+    // soft accent (badge/hover backgrounds). Must NOT be used for layout surfaces
+    primarySoft: string;
+    // focus ring
     ring: string;
+    // optional sidebar accent, never used for background
     sidebarPrimary?: string;
     sidebarPrimaryForeground?: string;
 };
@@ -49,6 +55,7 @@ const primaryPalettes: Record<
         light: {
             primary: 'hsl(0 0% 10%)',
             primaryForeground: 'hsl(0 0% 98%)',
+            primarySoft: 'hsl(0 0% 96% / 0.6)',
             ring: 'hsl(0 0% 45%)',
             sidebarPrimary: 'hsl(0 0% 10%)',
             sidebarPrimaryForeground: 'hsl(0 0% 98%)',
@@ -56,6 +63,7 @@ const primaryPalettes: Record<
         dark: {
             primary: 'hsl(0 0% 92%)',
             primaryForeground: 'hsl(0 0% 10%)',
+            primarySoft: 'hsl(0 0% 20% / 0.6)',
             ring: 'hsl(0 0% 60%)',
             sidebarPrimary: 'hsl(0 0% 92%)',
             sidebarPrimaryForeground: 'hsl(0 0% 10%)',
@@ -66,6 +74,7 @@ const primaryPalettes: Record<
         light: {
             primary: 'hsl(25 13% 17%)',
             primaryForeground: 'hsl(60 9% 98%)',
+            primarySoft: 'hsl(25 20% 95% / 0.6)',
             ring: 'hsl(25 12% 42%)',
             sidebarPrimary: 'hsl(25 13% 17%)',
             sidebarPrimaryForeground: 'hsl(60 9% 98%)',
@@ -73,6 +82,7 @@ const primaryPalettes: Record<
         dark: {
             primary: 'hsl(30 14% 88%)',
             primaryForeground: 'hsl(25 13% 17%)',
+            primarySoft: 'hsl(25 10% 22% / 0.6)',
             ring: 'hsl(28 12% 68%)',
             sidebarPrimary: 'hsl(30 14% 88%)',
             sidebarPrimaryForeground: 'hsl(25 13% 17%)',
@@ -83,6 +93,7 @@ const primaryPalettes: Record<
         light: {
             primary: 'hsl(240 6% 10%)',
             primaryForeground: 'hsl(0 0% 98%)',
+            primarySoft: 'hsl(240 6% 96% / 0.6)',
             ring: 'hsl(240 5% 64%)',
             sidebarPrimary: 'hsl(240 6% 10%)',
             sidebarPrimaryForeground: 'hsl(0 0% 98%)',
@@ -90,6 +101,7 @@ const primaryPalettes: Record<
         dark: {
             primary: 'hsl(240 5% 93%)',
             primaryForeground: 'hsl(240 6% 10%)',
+            primarySoft: 'hsl(240 5% 20% / 0.6)',
             ring: 'hsl(240 5% 70%)',
             sidebarPrimary: 'hsl(240 5% 93%)',
             sidebarPrimaryForeground: 'hsl(240 6% 10%)',
@@ -100,6 +112,7 @@ const primaryPalettes: Record<
         light: {
             primary: 'hsl(222 47% 11%)',
             primaryForeground: 'hsl(210 40% 98%)',
+            primarySoft: 'hsl(222 47% 96% / 0.6)',
             ring: 'hsl(222 84% 10%)',
             sidebarPrimary: 'hsl(222 47% 11%)',
             sidebarPrimaryForeground: 'hsl(210 40% 98%)',
@@ -107,6 +120,7 @@ const primaryPalettes: Record<
         dark: {
             primary: 'hsl(217 33% 89%)',
             primaryForeground: 'hsl(222 47% 11%)',
+            primarySoft: 'hsl(220 20% 20% / 0.6)',
             ring: 'hsl(215 25% 65%)',
             sidebarPrimary: 'hsl(217 33% 89%)',
             sidebarPrimaryForeground: 'hsl(222 47% 11%)',
@@ -117,6 +131,7 @@ const primaryPalettes: Record<
         light: {
             primary: 'hsl(243 75% 59%)',
             primaryForeground: 'hsl(0 0% 98%)',
+            primarySoft: 'hsl(243 75% 90% / 0.5)',
             ring: 'hsl(243 75% 59%)',
             sidebarPrimary: 'hsl(243 75% 59%)',
             sidebarPrimaryForeground: 'hsl(0 0% 98%)',
@@ -124,6 +139,7 @@ const primaryPalettes: Record<
         dark: {
             primary: 'hsl(243 75% 75%)',
             primaryForeground: 'hsl(0 0% 10%)',
+            primarySoft: 'hsl(243 75% 25% / 0.5)',
             ring: 'hsl(243 75% 75%)',
             sidebarPrimary: 'hsl(243 75% 75%)',
             sidebarPrimaryForeground: 'hsl(0 0% 10%)',
@@ -134,6 +150,7 @@ const primaryPalettes: Record<
         light: {
             primary: 'hsl(188 94% 42%)',
             primaryForeground: 'hsl(0 0% 98%)',
+            primarySoft: 'hsl(188 94% 90% / 0.5)',
             ring: 'hsl(188 94% 42%)',
             sidebarPrimary: 'hsl(188 94% 42%)',
             sidebarPrimaryForeground: 'hsl(0 0% 98%)',
@@ -141,6 +158,7 @@ const primaryPalettes: Record<
         dark: {
             primary: 'hsl(188 94% 65%)',
             primaryForeground: 'hsl(0 0% 10%)',
+            primarySoft: 'hsl(188 94% 25% / 0.5)',
             ring: 'hsl(188 94% 65%)',
             sidebarPrimary: 'hsl(188 94% 65%)',
             sidebarPrimaryForeground: 'hsl(0 0% 10%)',
@@ -151,6 +169,7 @@ const primaryPalettes: Record<
         light: {
             primary: 'hsl(160 84% 39%)',
             primaryForeground: 'hsl(0 0% 98%)',
+            primarySoft: 'hsl(160 84% 90% / 0.5)',
             ring: 'hsl(160 84% 39%)',
             sidebarPrimary: 'hsl(160 84% 39%)',
             sidebarPrimaryForeground: 'hsl(0 0% 98%)',
@@ -158,6 +177,7 @@ const primaryPalettes: Record<
         dark: {
             primary: 'hsl(160 84% 65%)',
             primaryForeground: 'hsl(0 0% 10%)',
+            primarySoft: 'hsl(160 84% 22% / 0.5)',
             ring: 'hsl(160 84% 65%)',
             sidebarPrimary: 'hsl(160 84% 65%)',
             sidebarPrimaryForeground: 'hsl(0 0% 10%)',
@@ -168,6 +188,7 @@ const primaryPalettes: Record<
         light: {
             primary: 'hsl(346 77% 49%)',
             primaryForeground: 'hsl(0 0% 98%)',
+            primarySoft: 'hsl(346 77% 92% / 0.5)',
             ring: 'hsl(346 77% 49%)',
             sidebarPrimary: 'hsl(346 77% 49%)',
             sidebarPrimaryForeground: 'hsl(0 0% 98%)',
@@ -175,6 +196,7 @@ const primaryPalettes: Record<
         dark: {
             primary: 'hsl(346 77% 70%)',
             primaryForeground: 'hsl(0 0% 10%)',
+            primarySoft: 'hsl(346 77% 24% / 0.5)',
             ring: 'hsl(346 77% 70%)',
             sidebarPrimary: 'hsl(346 77% 70%)',
             sidebarPrimaryForeground: 'hsl(0 0% 10%)',
@@ -185,6 +207,7 @@ const primaryPalettes: Record<
         light: {
             primary: 'hsl(262 83% 58%)',
             primaryForeground: 'hsl(0 0% 98%)',
+            primarySoft: 'hsl(262 83% 92% / 0.5)',
             ring: 'hsl(262 83% 58%)',
             sidebarPrimary: 'hsl(262 83% 58%)',
             sidebarPrimaryForeground: 'hsl(0 0% 98%)',
@@ -192,6 +215,7 @@ const primaryPalettes: Record<
         dark: {
             primary: 'hsl(262 83% 75%)',
             primaryForeground: 'hsl(0 0% 10%)',
+            primarySoft: 'hsl(262 83% 25% / 0.5)',
             ring: 'hsl(262 83% 75%)',
             sidebarPrimary: 'hsl(262 83% 75%)',
             sidebarPrimaryForeground: 'hsl(0 0% 10%)',
@@ -202,6 +226,7 @@ const primaryPalettes: Record<
         light: {
             primary: 'hsl(45 93% 47%)',
             primaryForeground: 'hsl(0 0% 10%)',
+            primarySoft: 'hsl(45 93% 92% / 0.6)',
             ring: 'hsl(45 93% 47%)',
             sidebarPrimary: 'hsl(45 93% 47%)',
             sidebarPrimaryForeground: 'hsl(0 0% 10%)',
@@ -209,6 +234,7 @@ const primaryPalettes: Record<
         dark: {
             primary: 'hsl(45 93% 65%)',
             primaryForeground: 'hsl(0 0% 10%)',
+            primarySoft: 'hsl(45 93% 20% / 0.6)',
             ring: 'hsl(45 93% 65%)',
             sidebarPrimary: 'hsl(45 93% 65%)',
             sidebarPrimaryForeground: 'hsl(0 0% 10%)',
@@ -219,6 +245,7 @@ const primaryPalettes: Record<
         light: {
             primary: 'hsl(0 84% 60%)',
             primaryForeground: 'hsl(0 0% 98%)',
+            primarySoft: 'hsl(0 84% 92% / 0.5)',
             ring: 'hsl(0 84% 60%)',
             sidebarPrimary: 'hsl(0 84% 60%)',
             sidebarPrimaryForeground: 'hsl(0 0% 98%)',
@@ -226,6 +253,7 @@ const primaryPalettes: Record<
         dark: {
             primary: 'hsl(0 84% 75%)',
             primaryForeground: 'hsl(0 0% 10%)',
+            primarySoft: 'hsl(0 84% 25% / 0.5)',
             ring: 'hsl(0 84% 75%)',
             sidebarPrimary: 'hsl(0 84% 75%)',
             sidebarPrimaryForeground: 'hsl(0 0% 10%)',
@@ -236,6 +264,7 @@ const primaryPalettes: Record<
         light: {
             primary: 'hsl(84 81% 44%)',
             primaryForeground: 'hsl(0 0% 10%)',
+            primarySoft: 'hsl(84 81% 92% / 0.6)',
             ring: 'hsl(84 81% 44%)',
             sidebarPrimary: 'hsl(84 81% 44%)',
             sidebarPrimaryForeground: 'hsl(0 0% 10%)',
@@ -243,6 +272,7 @@ const primaryPalettes: Record<
         dark: {
             primary: 'hsl(84 81% 65%)',
             primaryForeground: 'hsl(0 0% 10%)',
+            primarySoft: 'hsl(84 81% 22% / 0.6)',
             ring: 'hsl(84 81% 65%)',
             sidebarPrimary: 'hsl(84 81% 65%)',
             sidebarPrimaryForeground: 'hsl(0 0% 10%)',
@@ -253,6 +283,7 @@ const primaryPalettes: Record<
         light: {
             primary: 'hsl(142 71% 45%)',
             primaryForeground: 'hsl(0 0% 98%)',
+            primarySoft: 'hsl(142 71% 92% / 0.5)',
             ring: 'hsl(142 71% 45%)',
             sidebarPrimary: 'hsl(142 71% 45%)',
             sidebarPrimaryForeground: 'hsl(0 0% 98%)',
@@ -260,6 +291,7 @@ const primaryPalettes: Record<
         dark: {
             primary: 'hsl(142 71% 65%)',
             primaryForeground: 'hsl(0 0% 10%)',
+            primarySoft: 'hsl(142 71% 22% / 0.5)',
             ring: 'hsl(142 71% 65%)',
             sidebarPrimary: 'hsl(142 71% 65%)',
             sidebarPrimaryForeground: 'hsl(0 0% 10%)',
@@ -270,6 +302,7 @@ const primaryPalettes: Record<
         light: {
             primary: 'hsl(217 91% 60%)',
             primaryForeground: 'hsl(0 0% 98%)',
+            primarySoft: 'hsl(217 91% 92% / 0.5)',
             ring: 'hsl(217 91% 60%)',
             sidebarPrimary: 'hsl(217 91% 60%)',
             sidebarPrimaryForeground: 'hsl(0 0% 98%)',
@@ -277,6 +310,7 @@ const primaryPalettes: Record<
         dark: {
             primary: 'hsl(217 91% 75%)',
             primaryForeground: 'hsl(0 0% 10%)',
+            primarySoft: 'hsl(217 91% 25% / 0.5)',
             ring: 'hsl(217 91% 75%)',
             sidebarPrimary: 'hsl(217 91% 75%)',
             sidebarPrimaryForeground: 'hsl(0 0% 10%)',
@@ -287,6 +321,7 @@ const primaryPalettes: Record<
         light: {
             primary: 'hsl(271 81% 56%)',
             primaryForeground: 'hsl(0 0% 98%)',
+            primarySoft: 'hsl(271 81% 92% / 0.5)',
             ring: 'hsl(271 81% 56%)',
             sidebarPrimary: 'hsl(271 81% 56%)',
             sidebarPrimaryForeground: 'hsl(0 0% 98%)',
@@ -294,6 +329,7 @@ const primaryPalettes: Record<
         dark: {
             primary: 'hsl(271 81% 75%)',
             primaryForeground: 'hsl(0 0% 10%)',
+            primarySoft: 'hsl(271 81% 25% / 0.5)',
             ring: 'hsl(271 81% 75%)',
             sidebarPrimary: 'hsl(271 81% 75%)',
             sidebarPrimaryForeground: 'hsl(0 0% 10%)',
@@ -304,6 +340,7 @@ const primaryPalettes: Record<
         light: {
             primary: 'hsl(330 81% 60%)',
             primaryForeground: 'hsl(0 0% 98%)',
+            primarySoft: 'hsl(330 81% 92% / 0.5)',
             ring: 'hsl(330 81% 60%)',
             sidebarPrimary: 'hsl(330 81% 60%)',
             sidebarPrimaryForeground: 'hsl(0 0% 98%)',
@@ -311,6 +348,7 @@ const primaryPalettes: Record<
         dark: {
             primary: 'hsl(330 81% 75%)',
             primaryForeground: 'hsl(0 0% 10%)',
+            primarySoft: 'hsl(330 81% 25% / 0.5)',
             ring: 'hsl(330 81% 75%)',
             sidebarPrimary: 'hsl(330 81% 75%)',
             sidebarPrimaryForeground: 'hsl(0 0% 10%)',
@@ -321,6 +359,7 @@ const primaryPalettes: Record<
         light: {
             primary: 'hsl(24 95% 53%)',
             primaryForeground: 'hsl(0 0% 98%)',
+            primarySoft: 'hsl(24 95% 92% / 0.5)',
             ring: 'hsl(24 95% 53%)',
             sidebarPrimary: 'hsl(24 95% 53%)',
             sidebarPrimaryForeground: 'hsl(0 0% 98%)',
@@ -328,6 +367,7 @@ const primaryPalettes: Record<
         dark: {
             primary: 'hsl(24 95% 70%)',
             primaryForeground: 'hsl(0 0% 10%)',
+            primarySoft: 'hsl(24 95% 22% / 0.5)',
             ring: 'hsl(24 95% 70%)',
             sidebarPrimary: 'hsl(24 95% 70%)',
             sidebarPrimaryForeground: 'hsl(0 0% 10%)',
@@ -421,7 +461,12 @@ const applyPrimaryColor = (
 
     root.style.setProperty('--primary', tokens.primary);
     root.style.setProperty('--primary-foreground', tokens.primaryForeground);
+    root.style.setProperty('--primary-soft', tokens.primarySoft);
     root.style.setProperty('--ring', tokens.ring);
+    // Sidebar accent variables derive from primary tokens
+    root.style.setProperty('--sidebar-accent', tokens.primarySoft);
+    root.style.setProperty('--sidebar-accent-foreground', tokens.sidebarPrimary ?? tokens.primary);
+    root.style.setProperty('--sidebar-ring', tokens.ring);
     root.style.setProperty(
         '--sidebar-primary',
         tokens.sidebarPrimary ?? tokens.primary,
@@ -431,6 +476,27 @@ const applyPrimaryColor = (
         tokens.sidebarPrimaryForeground ?? tokens.primaryForeground,
     );
 };
+
+/**
+ * Apply server-provided preferences (DB-backed) safely.
+ * Only overrides accent and mode; layout tokens remain semantic.
+ */
+export function applyServerPreferences(prefs?: Partial<Pick<AppearancePreferences, 'mode' | 'primaryColor'>>) {
+    if (typeof document === 'undefined' || !prefs) return;
+    const mode = prefs.mode ?? defaultPreferences.mode;
+    const resolved = updateTheme(mode, getSystemAppearance());
+    const palette = prefs.primaryColor ?? defaultPreferences.primaryColor;
+    applyPrimaryColor(palette, resolved);
+    // Persist so client reuses on refresh
+    try {
+        const existing = readPreferences();
+        writePreferences({
+            ...existing,
+            mode,
+            primaryColor: palette,
+        });
+    } catch {}
+}
 
 const applyContentWidth = (value: ContentWidth) => {
     if (typeof document === 'undefined') {
@@ -473,7 +539,6 @@ const applySkin = (skin: ThemeSkin) => {
 };
 
 const applyMenuTone = (semiDark: boolean, mode: ResolvedAppearance) => {
-    debugger;
     if (typeof document === 'undefined') {
         return;
     }
@@ -487,15 +552,12 @@ const applyMenuTone = (semiDark: boolean, mode: ResolvedAppearance) => {
         root.style.setProperty('--sidebar-background', 'hsl(230 10% 12%)');
         root.style.setProperty('--sidebar', 'hsl(230 10% 12%)');
         root.style.setProperty('--sidebar-foreground', 'hsl(0 0% 96%)');
-        root.style.setProperty('--sidebar-accent', 'hsl(230 10% 18%)');
-        root.style.setProperty('--sidebar-accent-foreground', 'hsl(0 0% 96%)');
+        // Leave accent variables to be controlled by primary palette
         root.style.setProperty('--sidebar-border', 'hsl(230 10% 22%)');
     } else {
         root.style.removeProperty('--sidebar-background');
         root.style.removeProperty('--sidebar');
         root.style.removeProperty('--sidebar-foreground');
-        root.style.removeProperty('--sidebar-accent');
-        root.style.removeProperty('--sidebar-accent-foreground');
         root.style.removeProperty('--sidebar-border');
     }
 };
@@ -529,7 +591,6 @@ const applyPreferences = (
     preferences: AppearancePreferences,
     systemAppearance: ResolvedAppearance,
 ) => {
-    debugger;
     const resolved = updateTheme(preferences.mode, systemAppearance);
 
     applyPrimaryColor(preferences.primaryColor, resolved);

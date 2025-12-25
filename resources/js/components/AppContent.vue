@@ -4,7 +4,7 @@ import { useAppearance } from '@/composables/useAppearance';
 import { computed } from 'vue';
 
 interface Props {
-    variant?: 'header' | 'sidebar';
+    variant?: 'floating' | 'sidebar' | 'inset';
     class?: string;
 }
 

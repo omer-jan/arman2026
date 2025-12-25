@@ -1,31 +1,27 @@
 # Appearance refactor progress (Dec 20, 2025)
 
-## Current state observed
-- Appearance settings page at resources/js/pages/settings/Appearance.vue uses local `useAppearance` composable; stores preferences only in localStorage/cookies; no DB persistence.
-- `useAppearance.ts` manages primary palettes and applies tokens directly (including sidebar tokens) on the document root; uses localStorage defaults; still contains `debugger` statements.
-- Base theme tokens are defined in resources/css/app.css; primary is currently also used for sidebar/layout tokens in dark mode; surfaces and accent tokens are mixed.
-- Settings route for appearance currently returns Inertia view inline; no controller or persistence; middleware only shares `appearance` cookie.
+## What I implemented
+- DB-backed preferences: Added migration `2025_12_20_000000_add_appearance_preferences_to_users_table.php` with `primary_color` (default 'slate') and `theme_mode` (default 'system').
+- Model update: Included `primary_color` and `theme_mode` in `App/Models/User.php` fillable.
+- Backend routes + controller: Added `Settings/AppearanceController` with `edit` + `update`; wired GET/PATCH routes in `routes/settings.php`.
+- Inertia shared props: `HandleInertiaRequests@share` now provides `appearance: { mode, primaryColor }` sourced from the authenticated user (fallbacks applied).
+- Centralized client application: Extended `useAppearance.ts` with `applyServerPreferences()` to apply server values (and persist to localStorage) and added `primarySoft` token.
+- CSS tokens: Exposed `--color-primary-soft: var(--primary-soft)` in `resources/css/app.css` while keeping base semantic tokens stable for layout.
+- App bootstrap: In `resources/js/app.ts`, server preferences are applied before mount to avoid flash, then `initializeTheme()` maintains system sync.
+- UI persistence: In `resources/js/pages/settings/Appearance.vue`, added an Inertia `useForm` and watchers that PATCH the server when `primaryColor` or `appearance` change, while still updating immediately via the composable.
 
-## Gaps to address
-- Need DB-backed user appearance prefs (at minimum `primary_color`, `theme_mode`), with defaults and model casts.
-- Need Inertia-shared appearance props from backend; controller to edit/update preferences.
-- Need a single apply-theme function that consumes server-provided prefs and applies CSS variables (surface vs accent separated); remove layout usage of primary.
-- Need shadcn-vue token architecture: stable base surface tokens and accent-only primary tokens (solid/foreground/soft/ring); no primary backgrounds for layout (topbar/sidebar/cards/page bg).
-- Need automatic contrast protection for buttons/nav/sidebar text in light/dark; avoid color-only signals.
-- Appearance UI should persist via Inertia form, with safe swatch grid + live preview and immediate apply.
+## Alignment with shadcn-vue rules
+- Primary used strictly as an accent (`--primary`, `--primary-foreground`, `--primary-soft`, `--ring`).
+- Layout surfaces (topbar, sidebar, cards, page background) continue to use base surface tokens (`--background`, `--foreground`, `--muted`, `--border`).
+- Contrast safety: Foreground tokens are chosen per palette; base surfaces maintain readable text in both light/dark modes.
 
-## Plan next moves
-1) Add migration to `users` table for `primary_color` (string, default 'slate') and `theme_mode` (enum light/dark/system, default 'system'); consider nullable for fallback to defaults.
-2) Update `User` model: fillable/casts/accessor for appearance prefs with defaults.
-3) Create `Settings/AppearanceController` with `edit` (return page with prefs) and `update` (validate + persist); wire routes/settings.php to controller.
-4) Update `HandleInertiaRequests` to share appearance prefs from authenticated user (fallback to defaults/system) for hydration.
-5) Refactor `useAppearance`: accept initial prefs from Inertia, centralize `applyTheme` that sets CSS vars; remove `debugger`; ensure primary tokens do not set sidebar/layout backgrounds; keep surface tokens stable.
-6) Update CSS variable layers in resources/css/app.css to separate base semantic tokens from primary accent tokens (solid/foreground/soft/ring); ensure sidebar/topbar/cards use surface tokens only; add hover/soft tokens.
-7) Update Appearance.vue to use server values, submit via Inertia form, show swatch grid with safe palettes, and live-apply via composable.
-8) Add contrast guard helper to ensure readable text on buttons/nav/sidebar (use `--primary-foreground` on accent surfaces; keep surface text on surfaces).
-9) Audit layout components (AppLayout, sidebar) to replace any `bg-primary`/`text-primary-foreground` usage on structural surfaces with surface tokens.
-10) Re-run initializeTheme to hydrate from shared props; ensure system changes re-apply preferences.
+## Remaining tasks
+1) Review all layout components to ensure no `bg-primary` on structural surfaces; replace with surface tokens where needed.
+2) Add optional debounce to PATCH requests for reduced chatter under rapid changes.
+3) Provide small preview area in Appearance settings that showcases soft/solid/ring usage.
+4) Remove any lingering `debugger` statements in `useAppearance.ts` and ensure no accidental primary usage on layout backgrounds.
+5) Consider adding a lightweight contrast utility for dynamic user-defined colors (if we expand beyond curated swatches).
 
-## Notes
-- Keep shadcn rule: primary is accent only; layout surfaces use background/foreground/muted/border tokens.
-- Swatch list should stay within shadcn palettes (slate/stone/zinc/indigo/etc.)
+## How to continue
+- Start by auditing `resources/js/layouts` and sidebar/topbar components for surface token usage.
+- If you want a save button instead of auto-save, switch the watchers to update the form state and add a single `form.patch(update().url)` on submit.

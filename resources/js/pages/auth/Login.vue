@@ -46,7 +46,6 @@ defineProps<{
                         id="email"
                         type="email"
                         name="email"
-                        defaultValue="zubair.netD@outlook.com"
                         required
                         autofocus
                         :tabindex="1"
@@ -72,7 +71,6 @@ defineProps<{
                         id="password"
                         type="password"
                         name="password"
-                        default-value="24132413"
                         required
                         :tabindex="2"
                         autocomplete="current-password"
