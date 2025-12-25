@@ -68,7 +68,7 @@ defineProps<{
                         </TextLink>
                     </div>
                     <Input
-                        id="password"
+                        id="password"l
                         type="password"
                         name="password"
                         required

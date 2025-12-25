@@ -69,24 +69,15 @@ const primaryOptions: ReadonlyArray<{
     label: string;
     swatch: string;
 }> = [
+    // Curated to reduce similar hues
     { value: 'neutral', label: 'Neutral', swatch: '#171717' },
-    { value: 'stone', label: 'Stone', swatch: '#1c1917' },
-    { value: 'zinc', label: 'Zinc', swatch: '#18181b' },
-    { value: 'slate', label: 'Slate', swatch: '#0f172a' },
-
-    { value: 'indigo', label: 'Indigo', swatch: '#4f46e5' },
     { value: 'blue', label: 'Blue', swatch: '#2563eb' },
     { value: 'cyan', label: 'Cyan', swatch: '#0891b2' },
-    { value: 'emerald', label: 'Emerald', swatch: '#059669' },
     { value: 'green', label: 'Green', swatch: '#16a34a' },
-    { value: 'lime', label: 'Lime', swatch: '#65a30d' },
     { value: 'yellow', label: 'Yellow', swatch: '#ca8a04' },
     { value: 'orange', label: 'Orange', swatch: '#ea580c' },
     { value: 'red', label: 'Red', swatch: '#dc2626' },
-    { value: 'rose', label: 'Rose', swatch: '#e11d48' },
-    { value: 'pink', label: 'Pink', swatch: '#db2777' },
     { value: 'purple', label: 'Purple', swatch: '#7c3aed' },
-    { value: 'violet', label: 'Violet', swatch: '#8b5cf6' },
 ];
 
 
@@ -135,18 +126,19 @@ const previewActiveTab = ref<'Overview' | 'Billing' | 'Team'>('Overview');
 
                             <div class="space-y-2">
                                 <Label class="text-sm font-medium">Primary color</Label>
-                                <div class="space-y-2">
+                                <div class="grid grid-cols-3 sm:grid-cols-4 gap-3">
                                     <Button
                                         v-for="option in primaryOptions"
                                         :key="option.value"
                                         :variant="primaryColor === option.value ? 'default' : 'outline'"
-                                        class="w-full justify-between"
+                                        class="flex items-center justify-center p-3"
+                                        :aria-label="option.label"
                                         @click="updatePrimaryColor(option.value)"
                                     >
-                                        <span class="font-medium">{{ option.label }}</span>
                                         <span
-                                            class="h-5 w-5 rounded-full border"
-                                            :style="{ backgroundColor: option.swatch }"
+                                            class="rounded-full border"
+                                            :class="primaryColor === option.value ? 'ring-2 ring-offset-2 ring-primary' : ''"
+                                            :style="{ backgroundColor: option.swatch, width: '2.25rem', height: '2.25rem' }"
                                         />
                                     </Button>
                                 </div>
