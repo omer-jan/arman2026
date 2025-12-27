@@ -22,6 +22,18 @@ import { usePage } from '@inertiajs/vue3';
 import { Bell, ChevronsUpDown, Moon, Sun } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
 import { setUiLocale, uiLocale } from '@/composables/useUiLocale'
+// Define your supported languages here
+import type { UiLocale } from '@/composables/useUiLocale'
+
+const languages: { code: UiLocale; label: string }[] = [
+  { code: 'en', label: 'English' },
+  { code: 'prs', label: 'دری' },
+  { code: 'ps', label: 'پشتو' },
+]
+const currentLanguage = computed(() => {
+  const found = languages.find((l) => l.code === uiLocale.value);
+  return found ? found.label : 'English';
+});
 interface NotificationItem {
     id: number;
     title: string;
@@ -110,14 +122,28 @@ const themeLabel = computed(() =>
                     <p>{{ themeLabel }}</p>
                 </TooltipContent>
             </Tooltip>
-<select
-  v-model="uiLocale"
-  @change="setUiLocale(uiLocale)"
-  class="rounded-md border px-2 py-1 text-sm"
->
-  <option value="en">English</option>
-  <option value="prs">دری</option>
-</select>
+<!-- Language Selector Dropdown -->
+    <DropdownMenu>
+      <DropdownMenuTrigger as-child>
+        <Button variant="outline" size="sm" class="min-w-[90px]">
+          {{ currentLanguage }}
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" class="w-36">
+        <DropdownMenuGroup>
+          <DropdownMenuLabel>Language</DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem
+            v-for="lang in languages"
+            :key="lang.code"
+            class="cursor-pointer"
+            @click="setUiLocale(lang.code)"
+          >
+            {{ lang.label }}
+          </DropdownMenuItem>
+        </DropdownMenuGroup>
+      </DropdownMenuContent>
+    </DropdownMenu>
             <DropdownMenu>
                 <DropdownMenuTrigger as-child>
                     <Button

@@ -26,6 +26,18 @@ export const messages = {
       documentation: 'مستندات',
     },
   },
+   ps: {
+    dashboard: {
+      title: 'ډشبورډ',
+      welcome: 'ستاسو د آرمان MIS ډشبورډ ته ښه راغلاست',
+      description:
+        'دا ستاسو ډشبورډ دی چیرې چې تاسو کولی شئ خپل غوښتنلیک اداره کړئ او مهم میټرکسونه وګورئ.',
+    },
+    menu: {
+      repository: 'ذخیره',
+      documentation: 'مستندات',
+    },
+  },
 }
 
 export const i18n = createI18n({
