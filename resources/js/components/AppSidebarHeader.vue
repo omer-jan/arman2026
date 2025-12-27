@@ -21,7 +21,7 @@ import type { BreadcrumbItemType } from '@/types';
 import { usePage } from '@inertiajs/vue3';
 import { Bell, ChevronsUpDown, Moon, Sun } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
-
+import { setUiLocale, uiLocale } from '@/composables/useUiLocale'
 interface NotificationItem {
     id: number;
     title: string;
@@ -110,7 +110,14 @@ const themeLabel = computed(() =>
                     <p>{{ themeLabel }}</p>
                 </TooltipContent>
             </Tooltip>
-
+<select
+  v-model="uiLocale"
+  @change="setUiLocale(uiLocale)"
+  class="rounded-md border px-2 py-1 text-sm"
+>
+  <option value="en">English</option>
+  <option value="prs">دری</option>
+</select>
             <DropdownMenu>
                 <DropdownMenuTrigger as-child>
                     <Button

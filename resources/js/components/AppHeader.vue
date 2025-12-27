@@ -4,6 +4,7 @@ import AppLogoIcon from '@/components/AppLogoIcon.vue';
 import Breadcrumbs from '@/components/Breadcrumbs.vue';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
+import { setUiLocale, uiLocale } from '@/composables/useUiLocale'
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -189,6 +190,7 @@ const rightNavItems: NavItem[] = [
 
                 <div class="ml-auto flex items-center space-x-2">
                     <div class="relative flex items-center space-x-1">
+
                         <Button
                             variant="ghost"
                             size="icon"
@@ -229,7 +231,7 @@ const rightNavItems: NavItem[] = [
                                             </Button>
                                         </TooltipTrigger>
                                         <TooltipContent>
-                                            <p>{{ item.title }}</p>
+                                            <p>{{ item.title }} </p>
                                         </TooltipContent>
                                     </Tooltip>
                                 </TooltipProvider>

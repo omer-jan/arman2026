@@ -5,7 +5,9 @@ import { type BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/vue3';
 import  { Switch } from'@/components/ui/switch';
 import PlaceholderPattern from '../components/PlaceholderPattern.vue';
+import { useI18n } from 'vue-i18n'
 
+const { t } = useI18n()
 const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Dashboard',
@@ -27,10 +29,10 @@ const breadcrumbs: BreadcrumbItem[] = [
                 <PlaceholderPattern class="absolute inset-0 h-full w-full rounded-xl bg-sidebar-bg/50" />
                 <div class="relative z-10 flex h-full flex-col items-center justify-center gap-4 p-4">
                     <h1 class="text-2xl font-semibold text-sidebar-foreground">
-                        Welcome to your Arman MIS Dashboard
+                          {{ t('dashboard.welcome') }}
                     </h1>
                     <p class="text-center text-sidebar-foreground/70">
-                        This is your dashboard where you can manage your application and view important metrics.
+                        {{ t('dashboard.description') }}
                     </p>
                 </div>
 

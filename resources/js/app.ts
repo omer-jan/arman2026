@@ -4,6 +4,7 @@ import { createInertiaApp } from '@inertiajs/vue3';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import type { DefineComponent } from 'vue';
 import { createApp, h } from 'vue';
+import { i18n } from '@/plugins/i18n'
 import { initializeTheme, applyServerPreferences } from './composables/useAppearance';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Arman Mis';
@@ -22,6 +23,7 @@ createInertiaApp({
 
         createApp({ render: () => h(App, props) })
             .use(plugin)
+            .use(i18n)
             .mount(el);
     },
     progress: {
