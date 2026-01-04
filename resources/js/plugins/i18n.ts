@@ -1,8 +1,6 @@
 import { createI18n } from 'vue-i18n';
 
-type Locale = 'en' | 'prs' | 'ps';
-const storedLocale = typeof window !== 'undefined' ? (localStorage.getItem('ui-locale') as Locale | null) : null;
-const defaultLocale: Locale = storedLocale || 'en';
+type Locale = 'en' | 'prs' | 'ps'; 
 
 export const messages = {
     en: {
@@ -45,46 +43,7 @@ export const messages = {
         },
         hello: 'Hello!',
     },
-    prs: {
-        common: {
-            addNew: 'Add New',
-            download: 'Download / Export',
-            search: 'Search',
-            clear: 'Clear search',
-            status: 'Status',
-            active: 'Active',
-            deactive: 'Deactive',
-            code: 'Code',
-            titleEn: 'Title (English)',
-            titlePrs: 'Title (Dari)',
-            titlePs: 'Title (Pashto)',
-            actions: 'Actions',
-            save: 'Save',
-            cancel: 'Cancel',
-            update: 'Update',
-            delete: 'Delete',
-            confirm: 'Confirm',
-            language: 'Language',
-            view: 'View',
-            sortBy: 'Sort by',
-            direction: 'Direction',
-            ascending: 'Ascending',
-            descending: 'Descending',
-        },
-        pages: {
-            departments: {
-                heading: 'Departments',
-                description: 'Manage department records with multilingual titles.',
-                searchTitle: 'Search & Filter',
-                tableEmpty: 'No departments found.',
-                createSuccess: 'Department created successfully.',
-                updateSuccess: 'Department updated successfully.',
-                deleteSuccess: 'Department deleted successfully.',
-                localePreferenceLabel: 'Title display preference',
-            },
-        },
-        hello: 'Hello!',
-    },
+   
     ps: {
         common: {
             addNew: 'Add New',
@@ -125,7 +84,7 @@ export const messages = {
         },
         hello: 'Hello!',
     },
-    fa: {
+    prs: {
         common: {
             addNew: 'افزودن',
             download: 'دانلود / خروجی',
@@ -165,100 +124,14 @@ export const messages = {
         },
         hello: 'سلام!',
     },
-    ar: {
-        common: {
-            addNew: 'إضافة',
-            download: 'تنزيل / تصدير',
-            search: 'بحث',
-            clear: 'مسح البحث',
-            status: 'الحالة',
-            active: 'نشط',
-            deactive: 'غير نشط',
-            code: 'رمز',
-            titleEn: 'العنوان (إنجليزي)',
-            titlePrs: 'العنوان (داري)',
-            titlePs: 'العنوان (بشتو)',
-            actions: 'الإجراءات',
-            save: 'حفظ',
-            cancel: 'إلغاء',
-            update: 'تحديث',
-            delete: 'حذف',
-            confirm: 'تأكيد',
-            language: 'اللغة',
-            view: 'عرض',
-            sortBy: 'ترتيب حسب',
-            direction: 'الاتجاه',
-            ascending: 'تصاعدي',
-            descending: 'تنازلي',
-        },
-        pages: {
-            departments: {
-                heading: 'الأقسام',
-                description: 'إدارة الأقسام بعناوين متعددة اللغات.',
-                searchTitle: 'بحث وتصنيف',
-                tableEmpty: 'لا توجد أقسام.',
-                createSuccess: 'تم إنشاء القسم بنجاح.',
-                updateSuccess: 'تم تحديث القسم بنجاح.',
-                deleteSuccess: 'تم حذف القسم بنجاح.',
-                localePreferenceLabel: 'تفضيل عرض العنوان',
-            },
-        },
-        hello: 'مرحبًا!',
-    },
-    ja: {
-        common: {
-            addNew: '追加',
-            download: 'ダウンロード / エクスポート',
-            search: '検索',
-            clear: '検索クリア',
-            status: 'ステータス',
-            active: '有効',
-            deactive: '無効',
-            code: 'コード',
-            titleEn: 'タイトル（英語）',
-            titlePrs: 'タイトル（ダリー）',
-            titlePs: 'タイトル（パシュトー）',
-            actions: '操作',
-            save: '保存',
-            cancel: 'キャンセル',
-            update: '更新',
-            delete: '削除',
-            confirm: '確認',
-            language: '言語',
-            view: '表示',
-            sortBy: '並び替え',
-            direction: '方向',
-            ascending: '昇順',
-            descending: '降順',
-        },
-        pages: {
-            departments: {
-                heading: '部署',
-                description: '多言語タイトルで部署を管理します。',
-                searchTitle: '検索とフィルター',
-                tableEmpty: '部署がありません。',
-                createSuccess: '部署を作成しました。',
-                updateSuccess: '部署を更新しました。',
-                deleteSuccess: '部署を削除しました。',
-                localePreferenceLabel: 'タイトル表示の好み',
-            },
-        },
-        hello: 'こんにちは！',
-    },
+  
 };
 
 type MessageSchema = (typeof messages)['en'];
 
 export const i18n = createI18n<{ message: MessageSchema }, Locale>({
     legacy: false,
-    locale: defaultLocale,
+    locale:  localStorage.getItem('locale') || 'en',
     fallbackLocale: 'en',
     messages,
-});
-
-export const setUiLocale = (locale: Locale): void => {
-    if (typeof window !== 'undefined') {
-        localStorage.setItem('ui-locale', locale);
-    }
-    i18n.global.locale.value = locale;
-};
+}); 

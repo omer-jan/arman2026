@@ -21,14 +21,14 @@ import type { BreadcrumbItemType } from '@/types';
 import { usePage } from '@inertiajs/vue3';
 import { Bell, ChevronsUpDown, Moon, Sun } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
-import { useI18nDirection } from '@/composables/useI18nDirection';
+import { useI18nDirection } from '@/composables/useDirection';
 import {
-    Select,
+    SelectRoot,
     SelectContent,
     SelectItem,
     SelectTrigger,
     SelectValue,
-} from 'reka-ui';
+} from 'reka-ui'
 
 interface NotificationItem {
     id: number;
@@ -107,19 +107,42 @@ const { currentLocale, languages, changeLanguage, dir, greeting } = useI18nDirec
         <div class="flex items-center gap-2">
             <!-- Language selector -->
             <div class="hidden sm:block">
-                <Select :value="currentLocale" @update:value="changeLanguage">
-                    <SelectTrigger aria-label="Select language" class="w-36">
+<!--                <Select :value="currentLocale" @update:value="changeLanguage">-->
+<!--                    <SelectTrigger aria-label="Select language" class="w-36">-->
+<!--                        <SelectValue placeholder="Language" />-->
+<!--                    </SelectTrigger>-->
+<!--                    <SelectContent>-->
+<!--                        <SelectItem v-for="lang in languages" :key="lang.value" :value="lang.value">-->
+<!--                            <span class="flex w-full items-center justify-between">-->
+<!--                                <span>{{ lang.label }}</span>-->
+<!--                                <Badge variant="outline" class="ml-2">{{ lang.dir.toUpperCase() }}</Badge>-->
+<!--                            </span>-->
+<!--                        </SelectItem>-->
+<!--                    </SelectContent>-->
+<!--                </Select>-->
+                <SelectRoot
+                    :model-value="currentLocale"
+                    @update:model-value="changeLanguage"
+                >
+                    <SelectTrigger class="w-36" aria-label="Select language">
                         <SelectValue placeholder="Language" />
                     </SelectTrigger>
+
                     <SelectContent>
-                        <SelectItem v-for="lang in languages" :key="lang.value" :value="lang.value">
-                            <span class="flex w-full items-center justify-between">
-                                <span>{{ lang.label }}</span>
-                                <Badge variant="outline" class="ml-2">{{ lang.dir.toUpperCase() }}</Badge>
-                            </span>
+                        <SelectItem
+                            v-for="lang in languages"
+                            :key="lang.value"
+                            :value="lang.value"
+                        >
+        <span class="flex w-full items-center justify-between">
+          <span>{{ lang.label }}</span>
+          <span class="ml-2 text-xs border px-2 rounded">
+            {{ lang.dir.toUpperCase() }}
+          </span>
+        </span>
                         </SelectItem>
                     </SelectContent>
-                </Select>
+                </SelectRoot>
             </div>
 
             <!-- Current direction indicator -->
