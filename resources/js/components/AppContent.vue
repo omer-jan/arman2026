@@ -1,30 +1,29 @@
 <script setup lang="ts">
-import { SidebarInset } from '@/components/ui/sidebar';
-import { useAppearance } from '@/composables/useAppearance';
-import { computed } from 'vue';
+import { SidebarInset } from '@/components/ui/sidebar'
 
 interface Props {
-    variant?: 'header' | 'sidebar';
-    class?: string;
+    variant?: 'header' | 'sidebar'
+    class?: string
 }
 
-const props = defineProps<Props>();
-const { contentWidth } = useAppearance();
-
-const containerClass = computed(() => [
-    'flex w-full flex-1 flex-col gap-4 rounded-xl',
-    contentWidth.value === 'wide'
-        ? 'w-full'
-        : 'mx-auto max-w-[var(--app-content-max-width)]',
-    props.class,
-]);
+const props = defineProps<Props>()
 </script>
 
 <template>
-    <SidebarInset v-if="props.variant === 'sidebar'" :class="containerClass">
+    <!-- Sidebar layout -->
+    <SidebarInset
+        v-if="props.variant === 'sidebar'"
+        :class="['flex flex-col h-full', props.class]"
+    >
         <slot />
     </SidebarInset>
-    <main v-else :class="['h-full', ...containerClass]">
+
+    <!-- Header-only layout -->
+    <main
+        v-else
+        class="mx-auto flex h-full w-full max-w-7xl flex-1 flex-col gap-4 rounded-xl"
+        :class="props.class"
+    >
         <slot />
     </main>
 </template>
